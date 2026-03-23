@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -171,3 +172,21 @@ function resetGame(){
   statusEl.innerText="Player X Turn";
   createBoard();
 }
+
+function resetScore(){
+  scoreX=0; scoreO=0;
+  document.getElementById("scoreX").innerText=0;
+  document.getElementById("scoreO").innerText=0;
+}
+
+function toggleMode(){
+  vsComputer = !vsComputer;
+  document.querySelector('.toggle').innerText = vsComputer ? "Switch to 2 Player" : "Switch to vs Computer";
+  resetGame();
+}
+
+createBoard();
+</script>
+
+</body>
+</html>
