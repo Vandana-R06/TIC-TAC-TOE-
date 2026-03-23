@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tic Tac Toe</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+*{box-sizing:border-box;font-family:'Poppins',sans-serif}
+body{
+  display:flex;justify-content:center;align-items:center;height:100vh;
+  background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+}
+
+.container{
+  background:#121826;padding:25px;border-radius:20px;text-align:center;
+  width:380px;color:#fff;box-shadow:0 15px 35px rgba(0,0,0,0.5);
+}
+
+h1{margin-bottom:5px}
+
+.status{margin:10px 0;font-size:1.1rem}
+
+.scoreboard{
+  display:flex;justify-content:space-between;margin:10px 0;font-size:0.9rem;
+  background:#1f2a44;padding:8px 12px;border-radius:10px;
+}
+
+.board{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:15px 0;
+}
+
+.cell{
+  width:100px;height:100px;background:#2e2e48;
+  display:flex;justify-content:center;align-items:center;
+  font-size:2rem;border-radius:12px;cursor:pointer;
+  transition:0.2s;
+}
+
+.cell:hover{background:#444;transform:scale(1.05)}
+
+.winner{
+  background:#00c853 !important;
+}
+
+button{
+  padding:10px 20px;border:none;border-radius:20px;
+  background:#00c853;color:white;cursor:pointer;margin:5px;
+}
+
+button:hover{transform:scale(1.05)}
+
+.toggle{
+  margin-top:10px;font-size:0.9rem;cursor:pointer;color:#aaa;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>🎮 Tic Tac Toe</h1>
+
+  <div class="scoreboard">
+    <div>Player X: <span id="scoreX">0</span></div>
+    <div>Player O: <span id="scoreO">0</span></div>
+  </div>
+
+  <div class="status" id="status">Player X Turn</div>
+
+  <div class="board" id="board"></div>
+
+  <button onclick="resetGame()">Restart Game</button>
+  <button onclick="resetScore()">Reset Score</button>
+
+  <div class="toggle" onclick="toggleMode()">Switch to vs Computer</div>
+</div>
+
+<script>
+let board = Array(9).fill("");
+let currentPlayer = "X";
+let gameActive = true;
+let vsComputer = false;
+let scoreX = 0;
+let scoreO = 0;
+
+const boardEl = document.getElementById("board");
+const statusEl = document.getElementById("status");
+
+const winPatterns = [
+  [0,1,2],[3,4,5],[6,7,8],
+  [0,3,6],[1,4,7],[2,5,8],
+  [0,4,8],[2,4,6]
+];
+
+function createBoard(){
+  boardEl.innerHTML="";
+  board.forEach((value,i)=>{
+    const cell=document.createElement("div");
+    cell.classList.add("cell");
+    cell.innerText=value;
+    cell.addEventListener("click",()=>handleClick(i));
+    boardEl.appendChild(cell);
+  });
+}
+
+function handleClick(index){
+  if(board[index]!=="" || !gameActive) return;
+
+  board[index]=currentPlayer;
+  createBoard();
+
+  if(checkWin()){
+    statusEl.innerText=`Player ${currentPlayer} Wins 🎉`;
+    updateScore(currentPlayer);
+    gameActive=false;
+    return;
+  }
+
+  if(board.every(cell=>cell!=="")){
+    statusEl.innerText="It's a Draw 🤝";
+    gameActive=false;
+    return;
+  }
+
+  currentPlayer = currentPlayer === "X" ? "O" : "X";
+  statusEl.innerText=`Player ${currentPlayer} Turn`;
+
+  if(vsComputer && currentPlayer === "O"){
+    setTimeout(computerMove,500);
+  }
+}
+
+function computerMove(){
+  let emptyCells = board.map((v,i)=>v===""?i:null).filter(v=>v!==null);
+  let randomIndex = emptyCells[Math.floor(Math.random()*emptyCells.length)];
+  handleClick(randomIndex);
+}
+
+function checkWin(){
+  return winPatterns.some(pattern=>{
+    const [a,b,c]=pattern;
+    if(board[a] && board[a]===board[b] && board[a]===board[c]){
+      highlightWin(pattern);
+      return true;
+    }
+    return false;
+  });
+}
+
+function highlightWin(pattern){
+  const cells=document.querySelectorAll(".cell");
+  pattern.forEach(i=>cells[i].classList.add("winner"));
+}
+
+function updateScore(player){
+  if(player==="X"){
+    scoreX++;
+    document.getElementById("scoreX").innerText=scoreX;
+  } else {
+    scoreO++;
+    document.getElementById("scoreO").innerText=scoreO;
+  }
+}
+
+function resetGame(){
+  board = Array(9).fill("");
+  currentPlayer="X";
+  gameActive=true;
+  statusEl.innerText="Player X Turn";
+  createBoard();
+}
